@@ -8,7 +8,7 @@
  */
 
 // Version
-const BICOM_VERSION                 = "1.1.3-2024.12.11-12:45h"
+const BICOM_VERSION                 = "1.1.3-2024.12.19-08:57h"
 
 // Sheet names
 const README_SHEET_NAME             = "ReadMe"
@@ -48,7 +48,14 @@ const EDITION_STATUS_UNLOCKED       = "Unlocked"
 
 // User list in Coord's View
 const NUM_ROWS_PER_USER             = 4
+const ROW_MIXT_POS                  = 0
+const ROW_COORD_POS                 = 1
+const ROW_USER_POS                  = 2
+const ROW_INCOORD_POS               = 3
+const ROW_SHOW                      = true
+const ROW_HIDE                      = false
 const ROW_HIDDEN_TAG                = "h"
+const ROW_UNHIDDEN_TAG              = ""
 
 
 
@@ -390,27 +397,105 @@ function menu_DelALLusers()  {
 */
 function menu_ShowMixtRowForALLusers() {
   // Execute
-  var result = coordSheet_ShowMixtRows()
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_MIXT_POS)
   if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
 }
 
 
 /**
-* Menu entry to show the MIXT row for ALL users
+* Menu entry to hide the MIXT row for ALL users
 */
 function menu_HideMixtRowForALLusers() {
   // Execute
-  var result = coordSheet_HideMixtRows()
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_MIXT_POS)
   if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
 }
 
-/** TODO
-menu_ShowCoordRowForALLusers
-menu_HideCoordRowForALLusers
-menu_ShowUserRowForALLusers
-menu_HideUserRowForALLusers
-menu_HideInCoordRowForALLusers
+
+
+
+/**
+* Menu entry to show the MIXT row for ALL users
 */
+function menu_ShowMixtRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_MIXT_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+/**
+* Menu entry to hide the MIXT row for ALL users
+*/
+function menu_HideMixtRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_MIXT_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+
+
+/**
+* Menu entry to show the COORD row for ALL users
+*/
+function menu_ShowCoordRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_COORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+/**
+* Menu entry to hide the COORD row for ALL users
+*/
+function menu_HideCoordRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_COORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+
+/**
+* Menu entry to show the USER row for ALL users
+*/
+function menu_ShowUserRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_USER_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+/**
+* Menu entry to hide the USER row for ALL users
+*/
+function menu_HideUserRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_USER_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+/**
+* Menu entry to show the INCOORD row for ALL users
+*/
+function menu_ShowInCoordRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_INCOORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
+
+/**
+* Menu entry to hide the INCOORD row for ALL users
+*/
+function menu_HideInCoordRowForALLusers() {
+  // Execute
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_INCOORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+}
+
 
 
 
@@ -1122,99 +1207,79 @@ function coordSheet_DelUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
 
 
 /**
- * Hide MIXT row for some users in Coord tab
+ * Hide some row for some users in Coord tab
  *
  * @param {Number} iniAbsoluteRow [OPTIONAL] the initial user row (the one that contains its name)
  * @param {Number} endAbsoluteRow [OPTIONAL] the last user row (the one that contains its name)
  * @return {Number} constNOERROR if success of the corresponding error code/text
  */
-function coordSheet_HideMixtRows(iniAbsoluteRow=0, endAbsoluteRow=0) {
-JORDI
+function coordSheet_ShowOrHideRows(actionOnRow=ROW_SHOW,rowPos=ROW_MIXT_POS, iniAbsoluteRow=0, endAbsoluteRow=0) {
   var ss = SpreadsheetApp.getActiveSpreadsheet()
 
   // Load config values ==========================================================
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
-  
-  // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
-  var usersEmails2_5ref        = sheetCfg.getRange(CFG_USERS_EMAILS_1_5).getValue()
-
-  // Related to: tidy up ---------------------------------
-  var cleanConfig2_4ref        = sheetCfg.getRange(CFG_CLEAN_CONFIG_1_4).getValue()
-  var cleanMeta2_4ref          = sheetCfg.getRange(CFG_CLEAN_META_1_4  ).getValue()
-  var hideMeta2_4ref           = sheetCfg.getRange(CFG_HIDE_META_1_4   ).getValue()
-  var hideTech2_4ref           = sheetCfg.getRange(CFG_HIDE_TECH_1_4   ).getValue()
-  var hideTop2_4ref            = sheetCfg.getRange(CFG_HIDE_TOP_1_4    ).getValue()
-  var hideBottom2_4ref         = sheetCfg.getRange(CFG_HIDE_BOTTOM_1_4 ).getValue()  
+  var rowHiddenTags2_4ref      = sheetCfg.getRange(CFG_ROW_HIDDEN_TAGS_1_4).getValue()
      
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
 
-  // In order to: fetch data (references and values) ---------------------------
-  var usersNames3_5addr      = sheetCfg.getRange(usersNames2_5ref).getValue()
-  var usersNames4_5range     = sheetCoord.getRange(usersNames3_5addr)
-  var usersNames5_5values    = usersNames4_5range.getValues()
-
-  var usersEmails3_5addr     = sheetCfg.getRange(usersEmails2_5ref).getValue()
-  var usersEmails4_5range    = sheetCoord.getRange(usersEmails3_5addr)
-  var usersEmails5_5values   = usersEmails4_5range.getValues()
-    
-
   // In order to: write data (just references) ---------------------------------
-  var usersUrls3_5addr       = sheetCfg.getRange(usersUrls2_5ref).getValue()
-  var usersUrls4_5range      = sheetCoord.getRange(usersUrls3_5addr)
+  var rowHiddenTags3_4addr     = sheetCfg.getRange(rowHiddenTags2_4ref).getValue()
+  var rowHiddenTags4_4range    = sheetCoord.getRange(rowHiddenTags3_4addr)
 
 
-  // Compute row numbers relative to user s name list
-  var usersNamesIniAbsoluteRow = usersNames4_5range.getRowIndex()
+  // Compute row numbers
+  var rowHiddenTagsIniAbsoluteRow = rowHiddenTags4_4range.getRowIndex()
 
   if (iniAbsoluteRow == 0) { // Default ini row = first in list
-    iniAbsoluteRow = usersNamesIniAbsoluteRow
+    iniAbsoluteRow = rowHiddenTagsIniAbsoluteRow
   }
   if (endAbsoluteRow == 0) { // Default end row = last in list
-    endAbsoluteRow = usersNamesIniAbsoluteRow + usersNames4_5range.getNumRows()-NUM_ROWS_PER_USER
+    endAbsoluteRow = rowHiddenTagsIniAbsoluteRow + rowHiddenTags4_4range.getNumRows()-NUM_ROWS_PER_USER
   }
 
-  var iniRelativeRow = iniAbsoluteRow - usersNamesIniAbsoluteRow
-  var endRelativeRow = endAbsoluteRow - usersNamesIniAbsoluteRow
+  var iniRelativeRow = iniAbsoluteRow - rowHiddenTagsIniAbsoluteRow
+  var endRelativeRow = endAbsoluteRow - rowHiddenTagsIniAbsoluteRow
   if (   (iniRelativeRow <0)
       || ((iniRelativeRow%NUM_ROWS_PER_USER) != 0)
       || ( (endRelativeRow-iniRelativeRow) < 0 )
-      || ( (endRelativeRow-iniRelativeRow) > usersNames4_5range.getNumRows() )
+      || ( (endRelativeRow-iniRelativeRow) > rowHiddenTags4_4range.getNumRows() )
       || ((endRelativeRow%NUM_ROWS_PER_USER) != 0) ) {
         return "Create: Invalid row numbers iniRelativeRow("+iniRelativeRow+") "+
                 "endRelativeRow("+endRelativeRow+") from "+
                 "iniAbsoluteRow("+iniAbsoluteRow+") endAbsoluteRow("+endAbsoluteRow+") "+
-                "usersNamesIniAbsoluteRow("+usersNamesIniAbsoluteRow+")"
+                "rowHiddenTagsIniAbsoluteRow("+rowHiddenTagsIniAbsoluteRow+")"
   }
 
-
-  ss.toast("TODO...", "Hide MIXT rows")
-
-  // template file: hide technical stuff
-  const hideMeta3_4addr       = sheetCfg.getRange(hideMeta2_4ref   ).getValue()
-  const hideMeta4_4range      = templateSheetUsr.getRange(hideMeta3_4addr  )
-  templateSheetUsr.hideColumn(hideMeta4_4range) // hide Usr s clockwork
-
-
   // Iterate for each user ==========================================================
+  var cellWithHiddenTagRow = rowHiddenTags4_4range.getRow()
+  var cellWithHiddenTagCol = rowHiddenTags4_4range.getColumn()
   for ( rowId = iniRelativeRow; rowId <= endRelativeRow; rowId+=NUM_ROWS_PER_USER) {
+    // Locate row
+    var rowIdAbsolute          = cellWithHiddenTagRow+rowId+rowPos
+    var cellWithHiddenTag      = sheetCoord.getRange("R"+rowIdAbsolute+"C"+cellWithHiddenTagCol)
     
-    // Get user data  ------------------------------------------
-    var usrName     = usersNames5_5values[rowId][0]
-
-    ss.toast("Hiding Mixt row for user "+(((rowId-iniRelativeRow)+NUM_ROWS_PER_USER)/NUM_ROWS_PER_USER)+": "+usrName+"...", "Hide MIXT rows")
-
-    // Write hidden tag in User's Mixt row
-    var cellURLRange = "R"+(usersNames4_5range.getRow()+rowId)+"C"+usersUrls4_5range.getColumn()
-    sheetCoord.getRange(cellURLRange).setValue(ROW_HIDDEN_TAG)
-
+    if (actionOnRow == ROW_SHOW) {
+      // Write show tag in User's Mixt row
+      cellWithHiddenTag.setValue(ROW_UNHIDDEN_TAG)
+      // Show row
+      sheetCoord.showRows( rowIdAbsolute )
+    } else {
+      // Write hidden tag in User's Mixt row
+      cellWithHiddenTag.setValue(ROW_HIDDEN_TAG)
+      // Hide row
+      sheetCoord.hideRows( rowIdAbsolute )
+    }
   }
 
   return NOERROR
 }
+
+
+
+
+
 
 
 
