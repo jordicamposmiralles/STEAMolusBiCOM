@@ -8,7 +8,7 @@
  */
 
 // Version
-const BICOM_VERSION                 = "1.1.3-2024.12.19-08:57h"
+const BICOM_VERSION                 = "1.2.0-2025.01.17-10:14h"
 
 // Sheet names
 const README_SHEET_NAME             = "ReadMe"
