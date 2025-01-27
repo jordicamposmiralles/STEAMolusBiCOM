@@ -8,61 +8,68 @@
  */
 
 // Version
-const BICOM_VERSION                 = "1.2.0-2025.01.17-10:14h"
+const BICOM_VERSION                          = "1.2.0-2025.01.23-11:49h"
 
 // Sheet names
-const README_SHEET_NAME             = "ReadMe"
-const USR_SHEET_NAME                = "Usr" 
-const COORD_SHEET_NAME              = "Coord"
-const CFG_SHEET_NAME                = "Cfg"
-const SHEETS_TO_KEEP_IN_USR_COPY    = [USR_SHEET_NAME, CFG_SHEET_NAME]
+const README_SHEET_NAME                      = "ReadMe"
+const USR_SHEET_NAME                         = "Usr" 
+const COORD_SHEET_NAME                       = "Coord"
+const CFG_SHEET_NAME                         = "Cfg"
+const SHEETS_TO_KEEP_IN_USR_COPY             = [USR_SHEET_NAME, CFG_SHEET_NAME]
 
-const USR_MASTER                    = "Master" // Name of the special user used by Coord
 
 // Script inputs
-const CFG_USERS_NAMES_1_5           = "B04"
-const CFG_USERS_EMAILS_1_5          = "C04"
-const CFG_USERS_URLS_1_5            = "D04"
-const CFG_CLEAN_CONFIG_1_4          = "E04"
-const CFG_CLEAN_META_1_4            = "F04"
-const CFG_HIDE_META_1_4             = "G04"
-const CFG_HIDE_TECH_1_4             = "H04"
-const CFG_HIDE_TOP_1_4              = "I04"
-const CFG_HIDE_BOTTOM_1_4           = "J04"
-const CFG_TPL_USR_ROW_IN_COORD_1_4  = "K04"
-const CFG_ROW_HIDDEN_TAGS_1_4       = "P04"
-const BLOCKED_QUESTIONIDS1_4cfg     = "L04"
-const BLOCKED_CHECKBOXES1_4cfg      = "M04"
-const ANSWERS_RANGE1_4cfg           = "N04"
-
+const CFG_COORDTAB_USERS_NAMES_1_5           = "B04"
+const CFG_COORDTAB_USERS_EMAILS_1_5          = "C04"
+const CFG_COORDTAB_USERS_URLS_1_5            = "D04"
+const CFG_CFGTAB_CLEAN_CONFIG_1_4            = "E04"
+const CFG_USRTAB_CLEAN_META_1_4              = "F04"
+const CFG_USRTAB_HIDE_META_1_4               = "G04"
+const CFG_USRTAB_HIDE_TECH_1_4               = "H04"
+const CFG_USRTAB_HIDE_TOP_1_4                = "I04"
+const CFG_USRTAB_HIDE_BOTTOM_1_4             = "J04"
+const CFG_COORDTAB_TPL_USR_ROW_1_4           = "K04"
+const CFG_COORDTAB_BLOCKED_QUESTIONIDS_1_4   = "L04"
+const CFG_COORDTAB_BLOCKED_CHECKBOXES_1_4    = "M04"
+const CFG_USRTAB_ANSWERS_RANGE_1_4           = "N04"
+const CFG_COORDTAB_NUM_ROWS_PER_USER_1_2     = "O04"
+const CFG_COORDTAB_ROW_HIDDEN_TAGS_1_4       = "P04"
+const CFG_USRTAB_TPL_ROW_1_4                 = "Q04"
+const CFG_USRTAB_TPL_INPUTS_1_4              = "R04"
+const CFG_USRTAB_EDITABLE_META_1_4           = "S04"
+const CFG_COORDTAB_CONTENT_ID_1_4            = "T04"
+const CFG_COORDTAB_INSERTABLE_CONTENT_ID_1_4 = "U04"
+const CFG_COORDTAB_TPL_CONTENT_COL_1_4       = "V04"
 
 // Script outputs
-const CFG_COORD_URL                 = "C05" // (this is also an input)
-const CFG_PARTICULAR_NAME           = "C06"
-const EDITION_STATUS_CELL           = "E06"
-const EDITION_STATUS_LOCKED         = "Locked"
-const EDITION_STATUS_CHANGING       = "Changing"
-const EDITION_STATUS_UNLOCKED       = "Unlocked"
+const CFG_CFGTAB_COORD_URL                   = "C05" // (this is also an input)
+const CFG_CFGTAB_PARTICULAR_NAME             = "C06"
+const     MASTER_USERNAME                    = "Master" // Name of the special user used by Coord
+const CFG_CFGTAB_EDITION_STATUS_CELL         = "E06"
+const     EDITION_STATUS_LOCKED              = "Locked"
+const     EDITION_STATUS_CHANGING            = "Changing"
+const     EDITION_STATUS_UNLOCKED            = "Unlocked"
 
 
 
 // User list in Coord's View
-const NUM_ROWS_PER_USER             = 4
-const ROW_MIXT_POS                  = 0
-const ROW_COORD_POS                 = 1
-const ROW_USER_POS                  = 2
-const ROW_INCOORD_POS               = 3
-const ROW_SHOW                      = true
-const ROW_HIDE                      = false
-const ROW_HIDDEN_TAG                = "h"
-const ROW_UNHIDDEN_TAG              = ""
+const NUM_ROWS_PER_USER                      = 4
+const ROW_MIXT_POS                           = 0
+const ROW_COORD_POS                          = 1
+const ROW_USER_POS                           = 2
+const ROW_INCOORD_POS                        = 3
+
+const ROW_SHOW                               = true
+const ROW_HIDE                               = false
+const ROW_HIDDEN_TAG                         = "h"
+const ROW_UNHIDDEN_TAG                       = ""
 
 
 
 // General stuff
-const NOT_FOUND                     = -1
-const NOERROR                       =  0
-const ERROR_GENERIC                 =  1
+const NOT_FOUND                              = -1
+const NOERROR                                =  0
+const ERROR_GENERIC                          =  1
 
 
 
@@ -79,9 +86,14 @@ function onOpen() {
   // Check: if not Coord => EXIT
   var ss        = SpreadsheetApp.getActiveSpreadsheet()
   var sheetCfg  =  ss.getSheetByName(CFG_SHEET_NAME)
-  if (sheetCfg.getRange(CFG_PARTICULAR_NAME).getValue() != USR_MASTER) return
+  if (sheetCfg.getRange(CFG_CFGTAB_PARTICULAR_NAME).getValue() != MASTER_USERNAME) return
 
-  sheetCfg.getRange(CFG_COORD_URL).setValue( bicom_getSpreadsheetUrl() )
+  // Check: if num rows per user is different between this script and the spreadsheet => EXIT with ERROR
+  var numRowsPerUser2_2ref = sheetCfg.getRange(CFG_COORDTAB_NUM_ROWS_PER_USER_1_2).getValue()
+  if (NUM_ROWS_PER_USER != sheetCfg.getRange(numRowsPerUser2_2ref).getValue() )
+    { Browser.msgBox("CRITICAL ERROR(num rows per user differ between the script and the spreadsheet!!!)") ; return }
+
+  sheetCfg.getRange(CFG_CFGTAB_COORD_URL).setValue( bicom_getSpreadsheetUrl() )
 
   // If Coord => create Menu
   ui.createMenu("BiCom")
@@ -96,11 +108,12 @@ function onOpen() {
           // .addItem("Delete meta rows AFTER  a certain one", "menu_DelMetaAFTER")
       )
       .addSubMenu( ui.createMenu("b. Manage USERS (Coord tab)")
-        .addSubMenu( ui.createMenu("Add rows")
-          .addItem("Add users BEFORE a certain one", "menu_AddUsersBEFORE")
-          .addItem("Add users AFTER  a certain one", "menu_AddUsersAFTER")
-        )
-        .addSubMenu( ui.createMenu("Show/Hide rows (if desired)")
+        .addItem("Add users AFTER a certain one", "menu_AddUsersAFTER")
+        //.addSubMenu( ui.createMenu("Add users (rows in user's list)") // check menu_AddUsersBEFORE before activating again this submenu
+        //  .addItem("Add users BEFORE a certain one", "menu_AddUsersBEFORE") // check formating rules cleaning before activating again this menu entry
+        //  .addItem("Add users AFTER  a certain one", "menu_AddUsersAFTER")
+        //)
+        .addSubMenu( ui.createMenu("Show/Hide certain rows (if desired)")
           .addItem("Show Mixt",    "menu_ShowMixtRowForALLusers")
           .addItem("Hide Mixt",    "menu_HideMixtRowForALLusers")
           .addItem("Show Coord",   "menu_ShowCoordRowForALLusers")
@@ -115,7 +128,7 @@ function onOpen() {
             .addItem("Expand ALL users",    "menu_ExpandGroupsForALLusers")
           )
         )
-        .addSubMenu( ui.createMenu("Delete rows (and sheets)")
+        .addSubMenu( ui.createMenu("Delete users (rows in user's list and their sheets)")
           .addItem("Delete SOME users!", "menu_DelSOMEusers")
           .addItem("Delete almost ALL users!", "menu_DelALLusers")
         )
@@ -197,39 +210,61 @@ function menu_AddMetaBEFORE()  {
   var ss = SpreadsheetApp.getActiveSpreadsheet()
   var ui = SpreadsheetApp.getUi()
 
-Browser.msgBox("TO-DO menu_AddMetaBEFORE")
-return
-  // Ask the row of the first user => refUsrRow_int
-  var result = ui.prompt("Reference",
-                         "Number of the row of the reference user (the one having its name):",
-                          ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
-  var refUsrRow_int = parseInt(result.getResponseText())
-  if (!Number.isInteger(refUsrRow_int) ) { ss.toast("Not an integer number"); return }
 
-  // Ask the row of the last user => numOfNewUsers
-  var result = ui.prompt("Last", "Number of new users to add BEFORE:",
+  // Check current sheet (tab)
+  if (ss.getActiveSheet().getName() != USR_SHEET_NAME) {
+    // Confirm action in a differnt sheet (tab)
+    var result = ui.alert("Warning","You are not in "+USR_SHEET_NAME+" sheet (tab) where this action is going to take place. Do you confirm:\n\n"+
+      "Automatically changing to "+USR_SHEET_NAME+" sheet and perform the action "+"adding meta rows"+
+      "\n\n?", ui.ButtonSet.YES_NO_CANCEL);
+    if(result != ui.Button.YES) { ss.toast("Cancelling addition"); return }
+    else { ss.getSheetByName(USR_SHEET_NAME).activate(); SpreadsheetApp.flush() }
+  }
+
+  // Ask the reference row => refRow_int
+  var result = ui.prompt("Reference",
+                         "Number of the reference meta row (new meta rows will be inserted before it):",
                           ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
-  var numOfNewUsers = parseInt(result.getResponseText())
-  if (!Number.isInteger(numOfNewUsers) ) { ss.toast("Not an integer number"); return }
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
+  var refRow_int = parseInt(result.getResponseText())
+  if (!Number.isInteger(refRow_int) ) { ss.toast("Not an integer number"); return }
+
+  // Ask the number of rows to insert => numOfNewRows
+  var result = ui.prompt("Last", "Number of new meta rows to add BEFORE:",
+                          ui.ButtonSet.OK);
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
+  var numOfNewRows = parseInt(result.getResponseText())
+  if (!Number.isInteger(numOfNewRows) ) { ss.toast("Not an integer number"); return }
 
 
   // Confirm execution
   var result = ui.alert("Please confirm","Do you confirm:\n\n"+
-    "ADDING "+numOfNewUsers+" users to the Coord's list BEFORE row "+refUsrRow_int+
+    "ADDING "+numOfNewRows+" meta rows to the User's tab BEFORE row "+refRow_int+
     "\n\n?", ui.ButtonSet.YES_NO_CANCEL);
-  if(result != ui.Button.YES) { ss.toast("Cancelling addition"); return; }
+  if(result != ui.Button.YES) { ss.toast("Cancelling addition"); return }
  
 
-  ss.toast("Adding "+numOfNewUsers+" users...", "Adding");
-
-
-  // Adding rows
-  var result = coordSheet_AddUsers(refUsrRow_int, numOfNewUsers, "before")
+  // Adding meta rows to Usr sheet (tab)
+  ss.toast("Adding "+numOfNewRows+" meta rows to Usr sheet (tab)...", "Adding");
+  var result = usrSheet_AddMeta(refRow_int, numOfNewRows, "before")
   if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
 
-  ss.toast(numOfNewUsers+" users added. Wait some seconds to see the updates", "Done")
+  // Adding content cols to Coord sheet (tab)
+  SpreadsheetApp.flush()
+  ss.toast("Adding "+numOfNewRows+" content cols to Coord sheet (tab)...", "Adding");
+  ss.getSheetByName(COORD_SHEET_NAME).activate()
+  SpreadsheetApp.flush()
+  var result = coordSheet_AddContentColsRelatedToMetaInUsrSheet(refRow_int, numOfNewRows, "before")
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.getSheetByName(USR_SHEET_NAME).activate()
+
+//  // Updating user's spreadsheets (adding meta rows to their spreadsheets' Usr tab)
+//  ss.toast("Updating user's spreadsheets (this will take a while)", "Adding");
+//  var result = userSpreadsheets_(refRow_int, numOfNewRows, "before")
+//  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast(numOfNewRows+" meta rows added to Usr sheet (Coord sheet and User's spreadsheets have been updated accordingly). Wait some seconds to see the updates", "Done")
 }
 
 
@@ -248,14 +283,14 @@ function menu_AddUsersBEFORE()  {
   var result = ui.prompt("Reference",
                          "Number of the row of the reference user (the one having its name):",
                           ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
   var refUsrRow_int = parseInt(result.getResponseText())
   if (!Number.isInteger(refUsrRow_int) ) { ss.toast("Not an integer number"); return }
 
   // Ask the row of the last user => numOfNewUsers
   var result = ui.prompt("Last", "Number of new users to add BEFORE:",
                           ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
   var numOfNewUsers = parseInt(result.getResponseText())
   if (!Number.isInteger(numOfNewUsers) ) { ss.toast("Not an integer number"); return }
 
@@ -289,14 +324,14 @@ function menu_AddUsersAFTER()  {
   var result = ui.prompt("Reference",
                          "Number of the row of the reference user (the one having its name):",
                           ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
   var refUsrRow_int = parseInt(result.getResponseText())
   if (!Number.isInteger(refUsrRow_int) ) { ss.toast("Not an integer number"); return }
 
   // Ask the row of the last user => numOfNewUsers
   var result = ui.prompt("Last", "Number of new users to add AFTER:",
                           ui.ButtonSet.OK);
-  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return; }
+  if (result.getSelectedButton() != ui.Button.OK) { ss.toast("Cancelling addition"); return }
   var numOfNewUsers = parseInt(result.getResponseText())
   if (!Number.isInteger(numOfNewUsers) ) { ss.toast("Not an integer number"); return }
 
@@ -858,7 +893,7 @@ function menu_BlockQuestion() {
 
   // Mark the question as Blocked in the Coord Sheet
   var sheetCfg   = ss.getSheetByName(CFG_SHEET_NAME)
-  var blockedCheckboxes2_4ref   = sheetCfg.getRange(BLOCKED_CHECKBOXES1_4cfg ).getValue()  
+  var blockedCheckboxes2_4ref   = sheetCfg.getRange(CFG_COORDTAB_BLOCKED_CHECKBOXES_1_4 ).getValue()  
   var blockedCheckboxes3_4addr  = sheetCfg.getRange(blockedCheckboxes2_4ref  ).getValue()
   var sheetCoord = ss.getSheetByName(COORD_SHEET_NAME)
   var blockedCheckboxes4_4range = sheetCoord.getRange(blockedCheckboxes3_4addr )  
@@ -900,7 +935,7 @@ function menu_UnblockQuestion() {
 
   // Mark the question as UNblocked in the Coord Sheet
   var sheetCfg   = ss.getSheetByName(CFG_SHEET_NAME)
-  var blockedCheckboxes2_4ref   = sheetCfg.getRange(BLOCKED_CHECKBOXES1_4cfg ).getValue()  
+  var blockedCheckboxes2_4ref   = sheetCfg.getRange(CFG_COORDTAB_BLOCKED_CHECKBOXES_1_4 ).getValue()  
   var blockedCheckboxes3_4addr  = sheetCfg.getRange(blockedCheckboxes2_4ref  ).getValue()
   var sheetCoord = ss.getSheetByName(COORD_SHEET_NAME)
   var blockedCheckboxes4_4range = sheetCoord.getRange(blockedCheckboxes3_4addr )  
@@ -975,7 +1010,7 @@ function usrSheet_Meta_Clear(iniAbsoluteRow=0, endAbsoluteRow=0) {
   // Load config values ==========================================================
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
-  var cleanMeta2_4ref     = sheetCfg.getRange(CFG_CLEAN_META_1_4  ).getValue()
+  var cleanMeta2_4ref     = sheetCfg.getRange(CFG_USRTAB_CLEAN_META_1_4  ).getValue()
   var cleanMeta3_4addr    = sheetCfg.getRange(cleanMeta2_4ref).getValue()
 
   // Locate meta range ==========================================================
@@ -1013,10 +1048,185 @@ function usrSheet_Meta_Clear(iniAbsoluteRow=0, endAbsoluteRow=0) {
 
 
 
+/**
+ * Add meta rows to the Usr sheet
+ * @param {Number} refRow the reference meta row.
+ * @param {Number} numOfRows number of new meta rows.
+ * @param {string} sense "before" or "after".
+ * @return {Number} constNOERROR if success of the corresponding error code/text.
+ */
+function usrSheet_AddMeta(refRow, numOfRows, sense)  {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  // Load config values ==========================================================
+  var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
+  
+  var tplRowInUsr2_4ref        = sheetCfg.getRange(CFG_USRTAB_TPL_ROW_1_4).getValue()  
+  var tplInputsInUsr2_4ref     = sheetCfg.getRange(CFG_USRTAB_TPL_INPUTS_1_4).getValue()  
+  var editableMeta2_5ref       = sheetCfg.getRange(CFG_USRTAB_EDITABLE_META_1_4).getValue()
+
+     
+
+  // Load data from sheets =======================================================
+  var sheetUsr                 = ss.getSheetByName(USR_SHEET_NAME);
+
+  // Get Template range
+  var tplRowInUsr3_4addr       = sheetCfg.getRange(tplRowInUsr2_4ref   ).getValue()
+  var tplRowInUsr4_4range      = sheetCfg.getRange(tplRowInUsr3_4addr )  
+
+  // Get Template Inputs range
+  var tplInputsInUsr3_4addr    = sheetCfg.getRange(tplInputsInUsr2_4ref   ).getValue()
+  var tplInputsInUsr4_4range   = sheetCfg.getRange(tplInputsInUsr3_4addr )  
+
+  // Get Meta range
+  var editableMeta3_5addr      = sheetCfg.getRange(editableMeta2_5ref).getValue()
+  var editableMeta4_5range     = sheetUsr.getRange(editableMeta3_5addr)
+
+  // Check valid refRow input parameter
+  if (    (refRow < editableMeta4_5range.getRow()) 
+       || (refRow > editableMeta4_5range.getLastRow()) ) {
+    return "Row "+refRow+" is not in users list "+
+           "( editableMetaIni="+editableMeta4_5range.getRow()+
+           ", editableMetaEnd="+editableMeta4_5range.getLastRow()+")"
+  }
+
+  // Create rows ================================================================
+  var initialRow
+  var finalRow
+
+  if (sense == "before") {
+    initialRow = refRow
+    sheetUsr.insertRowsBefore(initialRow, numOfRows)    
+  } else if (sense == "after") {
+    initialRow = refRow + 1
+    sheetUsr.insertRowsAfter((initialRow-1), numOfRows)
+  } else { return "Unknown sense("+sense+")" }
+
+  finalRow   = initialRow + numOfRows-1
+
+  // Copy template to all new rows
+  var firstColInNewRows_range = sheetUsr.getRange( initialRow, 1, numOfRows)
+  tplRowInUsr4_4range.copyTo( firstColInNewRows_range, SpreadsheetApp.CopyPasteType.PASTE_NORMAL, false )
+
+//  TODELETE
+//  // Clean "id" and "content" columns in all new rows (the template row has labels to highlight it is a template row)
+//  var idAndContentsColInNewRows_range = sheetUsr.getRange( initialRow, 1, numOfRows, 2)
+//  idAndContentsColInNewRows_range.clearContent()
+//
+//  // Clean "inputs" columns in all new rows (the template contains INPUTRANGE formulae)
+//  var colTplInputsCoord  = tplInputsInUsr4_4range.getColumn() - tplRowInUsr4_4range.getColumn() + 1
+//  var inputsColInNewRows_range = sheetUsr.getRange( initialRow, colTplInputsCoord, numOfRows, 2)
+//  inputsColInNewRows_range.clearContent()
+
+  return NOERROR
+}
 
 
 
 
+
+/**
+ * Add content cols to the Coord sheet related to meta rows in Usr sheet
+ * @param {Number} refRow the reference meta row in Usr sheet.
+ * @param {Number} numOfRows number of new meta rows in Usr sheet.
+ * @param {string} sense "before" or "after".
+ * @return {Number} constNOERROR if success of the corresponding error code/text.
+ */
+function coordSheet_AddContentColsRelatedToMetaInUsrSheet(refMetaRow, numOfRows, sense)  {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  
+  // Load config values ==========================================================
+  var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
+  var editableMeta2_5ref       = sheetCfg.getRange(CFG_USRTAB_EDITABLE_META_1_4).getValue()
+  var insertableContent2_5ref  = sheetCfg.getRange(CFG_COORDTAB_INSERTABLE_CONTENT_ID_1_4).getValue()
+
+  // Get Meta (in Usr sheet) and Content (in Coord sheet) ranges
+  var sheetUsr                 = ss.getSheetByName(USR_SHEET_NAME);
+  var editableMeta3_5addr      = sheetCfg.getRange(editableMeta2_5ref).getValue()
+  var editableMeta4_5range     = sheetUsr.getRange(editableMeta3_5addr)
+
+  var sheetCoord               = ss.getSheetByName(COORD_SHEET_NAME);
+  var insertableContent3_5addr = sheetCfg.getRange(insertableContent2_5ref).getValue()
+  var insertableContent4_5range= sheetCoord.getRange(insertableContent3_5addr)
+
+  // Get first meta row (in Usr sheet) and content col (in Coord sheet)
+  var refRow_FirstEditableMetaRowInUsr           = editableMeta4_5range.getRow()
+  var refCol_FirstInsertableContentColColInCoord = insertableContent4_5range.getColumn()
+
+  // Compute the corresponding col (in Coord sheet) from meta row (in Usr sheet)
+  var refCol_int = refCol_FirstInsertableContentColColInCoord + (refMetaRow - refRow_FirstEditableMetaRowInUsr )
+
+  return coordSheet_AddContent(refCol_int, numOfRows, sense)
+}
+
+
+
+
+/**
+ * Add content rows to the Coord sheet
+ * @param {Number} refCol the reference content row.
+ * @param {Number} numOfCols number of new content rows.
+ * @param {string} sense "before" or "after".
+ * @return {Number} constNOERROR if success of the corresponding error code/text.
+ */
+function coordSheet_AddContent(refCol, numOfCols, sense)  {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  // Load config values ==========================================================
+  var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
+  
+  var tplColInCoord2_4ref      = sheetCfg.getRange(CFG_COORDTAB_TPL_CONTENT_COL_1_4).getValue()  
+  var insertableContent2_5ref  = sheetCfg.getRange(CFG_COORDTAB_INSERTABLE_CONTENT_ID_1_4).getValue()
+     
+
+  // Load data from sheets =======================================================
+  var sheetCoord               = ss.getSheetByName(COORD_SHEET_NAME);
+
+  // Get Template range
+  var tplColInCoord3_4addr     = sheetCfg.getRange(tplColInCoord2_4ref   ).getValue()
+  var tplColInCoord4_4range    = sheetCfg.getRange(tplColInCoord3_4addr )  
+
+  // Get Content range
+  var insertableContent3_5addr   = sheetCfg.getRange(insertableContent2_5ref).getValue()
+  var insertableContent4_5range  = sheetCoord.getRange(insertableContent3_5addr)
+
+  // Check valid refCol input parameter
+  if (    (refCol < insertableContent4_5range.getColumn()) 
+       || (refCol > insertableContent4_5range.getLastColumn()) ) {
+    return "Column "+refCol+" is not in Coord's content columns "+
+           "( insertableContentIni="+insertableContent4_5range.getColumn()+
+           ", insertableContentEnd="+insertableContent4_5range.getLastColumn()+")"
+  }
+
+  // Create cols ================================================================
+  var initialCol
+  var finalCol
+
+  if (sense == "before") {
+    initialCol = refCol
+    sheetCoord.insertColumnsBefore(initialCol, numOfCols)    
+  } else if (sense == "after") {
+    initialCol = refCol + 1
+    sheetCoord.insertColumnsAfter((initialCol-1), numOfCols)
+  } else { return "Unknown sense("+sense+")" }
+
+  finalCol   = initialCol + numOfCols-1
+
+  // Copy template to all new rows
+  var firstRowInNewCols_range = sheetCoord.getRange(1, initialCol, 1, numOfCols)
+  tplColInCoord4_4range.copyTo( firstRowInNewCols_range, SpreadsheetApp.CopyPasteType.PASTE_NORMAL, false )
+
+//  TODELETE
+//  // Clean "id" and "content" in all new cols (the template cols has a label to highlight it is a template col)
+//  var idAndContentsRowsInNewCols_range = sheetCoord.getRange(1, initialCol, 2, numOfCols)
+//  idAndContentsRowsInNewCols_range.clearContent()
+
+  return NOERROR
+}
 
 
 
@@ -1033,8 +1243,8 @@ function coordSheet_AddUsers(refRow, numOfUsers, sense)  {
   // Load config values ==========================================================
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var tplUsrRowInCoord2_4ref   = sheetCfg.getRange(CFG_TPL_USR_ROW_IN_COORD_1_4 ).getValue()  
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var tplUsrRowInCoord2_4ref   = sheetCfg.getRange(CFG_COORDTAB_TPL_USR_ROW_1_4 ).getValue()  
      
 
   // Load data from Coord Sheet ======================================================
@@ -1076,9 +1286,12 @@ function coordSheet_AddUsers(refRow, numOfUsers, sense)  {
   // Set default height for all new rows
   sheetCoord.setRowHeightsForced(initialRow, numOfAddedRows, 21)
 
-  // Remove grouping on the new rows
+  // Remove format and grouping on the new rows
   var allAddedRowsRange = sheetCoord.getRange( initialRow, 1, numOfAddedRows)
   allAddedRowsRange.shiftRowGroupDepth(-1)
+  allAddedRowsRange.clear()
+//  allAddedRowsRange.clearFormat()
+//  allAddedRowsRange.clearDataValidations()
 
   // For each user: copy template, hide "InCoord" row and clean name
   for ( rowId = initialRow; rowId <= finalRow ; rowId+= tplNumOfRows_int) {
@@ -1118,8 +1331,8 @@ function coordSheet_DelUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1218,7 +1431,7 @@ function coordSheet_ShowOrHideRows(actionOnRow=ROW_SHOW,rowPos=ROW_MIXT_POS, ini
 
   // Load config values ==========================================================
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
-  var rowHiddenTags2_4ref      = sheetCfg.getRange(CFG_ROW_HIDDEN_TAGS_1_4).getValue()
+  var rowHiddenTags2_4ref      = sheetCfg.getRange(CFG_COORDTAB_ROW_HIDDEN_TAGS_1_4).getValue()
      
 
   // Load data from Coord Sheet ======================================================
@@ -1297,8 +1510,8 @@ function coordSheet_CollapseUserGroups(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1356,8 +1569,8 @@ function coordSheet_ExpandUserGroups(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1424,17 +1637,17 @@ function coordSheet_CreateSpreadsheetsForUsers(folderId, filePrefix, iniAbsolute
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
-  var usersEmails2_5ref        = sheetCfg.getRange(CFG_USERS_EMAILS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
+  var usersEmails2_5ref        = sheetCfg.getRange(CFG_COORDTAB_USERS_EMAILS_1_5).getValue()
 
   // Related to: tidy up ---------------------------------
-  var cleanConfig2_4ref        = sheetCfg.getRange(CFG_CLEAN_CONFIG_1_4).getValue()
-  var cleanMeta2_4ref          = sheetCfg.getRange(CFG_CLEAN_META_1_4  ).getValue()
-  var hideMeta2_4ref           = sheetCfg.getRange(CFG_HIDE_META_1_4   ).getValue()
-  var hideTech2_4ref           = sheetCfg.getRange(CFG_HIDE_TECH_1_4   ).getValue()
-  var hideTop2_4ref            = sheetCfg.getRange(CFG_HIDE_TOP_1_4    ).getValue()
-  var hideBottom2_4ref         = sheetCfg.getRange(CFG_HIDE_BOTTOM_1_4 ).getValue()  
+  var cleanConfig2_4ref        = sheetCfg.getRange(CFG_CFGTAB_CLEAN_CONFIG_1_4).getValue()
+  var cleanMeta2_4ref          = sheetCfg.getRange(CFG_USRTAB_CLEAN_META_1_4  ).getValue()
+  var hideMeta2_4ref           = sheetCfg.getRange(CFG_USRTAB_HIDE_META_1_4   ).getValue()
+  var hideTech2_4ref           = sheetCfg.getRange(CFG_USRTAB_HIDE_TECH_1_4   ).getValue()
+  var hideTop2_4ref            = sheetCfg.getRange(CFG_USRTAB_HIDE_TOP_1_4    ).getValue()
+  var hideBottom2_4ref         = sheetCfg.getRange(CFG_USRTAB_HIDE_BOTTOM_1_4 ).getValue()  
      
 
   // Load data from Coord Sheet ======================================================
@@ -1509,8 +1722,8 @@ function coordSheet_CreateSpreadsheetsForUsers(folderId, filePrefix, iniAbsolute
   const templateSheetUsr    = templateSpreadsheet.getSheetByName(USR_SHEET_NAME)
 
   // => write CoodUrl
-  const coordUrl       = sheetCfg.getRange(CFG_COORD_URL).getValue()
-  templateSheetCfg.getRange(CFG_COORD_URL).setValue(coordUrl) // into template file
+  const coordUrl       = sheetCfg.getRange(CFG_CFGTAB_COORD_URL).getValue()
+  templateSheetCfg.getRange(CFG_CFGTAB_COORD_URL).setValue(coordUrl) // into template file
 
   // template file: clean cells to let ImportsRange fill them
   // => clean Config second section (CFG)
@@ -1540,6 +1753,8 @@ function coordSheet_CreateSpreadsheetsForUsers(folderId, filePrefix, iniAbsolute
   const hideBottom3_4addr      = sheetCfg.getRange(hideBottom2_4ref   ).getValue()
   const hideBottom4_4range     = templateSheetUsr.getRange(hideBottom3_4addr )  
   templateSheetUsr.hideRow(hideBottom4_4range) // hide Usr s bottom tech rows
+
+  templateSheetUsr.setFrozenRows(0) // drop frozen rows
 
   // template file: remove undesired sheets
   templateSheetCfg.hideSheet() // hide Cfg sheet
@@ -1576,7 +1791,7 @@ function coordSheet_CreateSpreadsheetsForUsers(folderId, filePrefix, iniAbsolute
       // NEW file: write usrName
       const newSpreadsheet = SpreadsheetApp.open(newFile)
       const newSheetCfg    = newSpreadsheet.getSheetByName(CFG_SHEET_NAME)
-      newSheetCfg.getRange(CFG_PARTICULAR_NAME).setValue(usrName)
+      newSheetCfg.getRange(CFG_CFGTAB_PARTICULAR_NAME).setValue(usrName)
 
       // COORD file: storing URL pointing to new file
       var cellURLRange = "R"+(usersNames4_5range.getRow()+rowId)+"C"+usersUrls4_5range.getColumn()
@@ -1607,9 +1822,9 @@ function coordSheet_GrantAccessForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
-  var usersEmails2_5ref        = sheetCfg.getRange(CFG_USERS_EMAILS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
+  var usersEmails2_5ref        = sheetCfg.getRange(CFG_COORDTAB_USERS_EMAILS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1698,9 +1913,9 @@ function coordSheet_LockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
-  var usersEmails2_5ref        = sheetCfg.getRange(CFG_USERS_EMAILS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
+  var usersEmails2_5ref        = sheetCfg.getRange(CFG_COORDTAB_USERS_EMAILS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1744,7 +1959,7 @@ function coordSheet_LockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
 
   
   // Iterate for each user ==========================================================
-  sheetCfg.getRange(EDITION_STATUS_CELL).setValue(EDITION_STATUS_CHANGING)
+  sheetCfg.getRange(CFG_CFGTAB_EDITION_STATUS_CELL).setValue(EDITION_STATUS_CHANGING)
   for ( rowId = iniRelativeRow; rowId <= endRelativeRow; rowId+=NUM_ROWS_PER_USER) {
     
     // Get user data  ------------------------------------------
@@ -1772,7 +1987,7 @@ function coordSheet_LockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
     //TODO: use     usrFile.addViewers( emailsArray )
   }
 
-  sheetCfg.getRange(EDITION_STATUS_CELL).setValue(EDITION_STATUS_LOCKED)
+  sheetCfg.getRange(CFG_CFGTAB_EDITION_STATUS_CELL).setValue(EDITION_STATUS_LOCKED)
 
   return NOERROR
 }
@@ -1795,9 +2010,9 @@ function coordSheet_UnlockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
   
   // Related to: user list -------------------------------
-  var usersNames2_5ref         = sheetCfg.getRange(CFG_USERS_NAMES_1_5).getValue()
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
-  var usersEmails2_5ref        = sheetCfg.getRange(CFG_USERS_EMAILS_1_5).getValue()
+  var usersNames2_5ref         = sheetCfg.getRange(CFG_COORDTAB_USERS_NAMES_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
+  var usersEmails2_5ref        = sheetCfg.getRange(CFG_COORDTAB_USERS_EMAILS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -1840,7 +2055,7 @@ function coordSheet_UnlockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
   }
 
   // Iterate for each user ==========================================================
-  sheetCfg.getRange(EDITION_STATUS_CELL).setValue(EDITION_STATUS_CHANGING)
+  sheetCfg.getRange(CFG_CFGTAB_EDITION_STATUS_CELL).setValue(EDITION_STATUS_CHANGING)
   for ( rowId = iniRelativeRow; rowId <= endRelativeRow; rowId+=NUM_ROWS_PER_USER) {
     
     // Get user data  ------------------------------------------
@@ -1867,7 +2082,7 @@ function coordSheet_UnlockEditionForUsers(iniAbsoluteRow=0, endAbsoluteRow=0) {
 // TODELETE:    emailsArray.forEach( function( email ) { usrFile.removeViewer( email ) })
   }
 
-  sheetCfg.getRange(EDITION_STATUS_CELL).setValue(EDITION_STATUS_UNLOCKED)
+  sheetCfg.getRange(CFG_CFGTAB_EDITION_STATUS_CELL).setValue(EDITION_STATUS_UNLOCKED)
 
   return NOERROR
 }
@@ -1910,7 +2125,7 @@ function coordSheet_BlockOrUnblockQuestion(checkboxCol, block) {
 
   // Load config values ==========================================================
   var sheetCfg                 = ss.getSheetByName(CFG_SHEET_NAME)
-  var usersUrls2_5ref          = sheetCfg.getRange(CFG_USERS_URLS_1_5).getValue()
+  var usersUrls2_5ref          = sheetCfg.getRange(CFG_COORDTAB_USERS_URLS_1_5).getValue()
 
   // Load data from Coord Sheet ======================================================
   var sheetCoord    = ss.getSheetByName(COORD_SHEET_NAME);
@@ -2039,7 +2254,7 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
 
     // Load first checkbox col number from config
     if ( firstQuestionId_int==0 ) {
-      var blockedQuestionIds2_4ref   = sheetCfg.getRange(BLOCKED_QUESTIONIDS1_4cfg).getValue()  
+      var blockedQuestionIds2_4ref   = sheetCfg.getRange(CFG_COORDTAB_BLOCKED_QUESTIONIDS_1_4).getValue()  
       var blockedQuestionIds3_4addr  = sheetCfg.getRange(blockedQuestionIds2_4ref   ).getValue()
       var blockedQuestionIds4_4range = sheetCoord.getRange(blockedQuestionIds3_4addr )  
 
@@ -2048,7 +2263,7 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
 
     // Load first answer row number from config
     if ( firstAnswerRow_int==0 ) {
-      var answersRange2_4ref   = sheetCfg.getRange(ANSWERS_RANGE1_4cfg ).getValue()  
+      var answersRange2_4ref   = sheetCfg.getRange(CFG_USRTAB_ANSWERS_RANGE_1_4 ).getValue()  
       var answersRange3_4addr  = sheetCfg.getRange(answersRange2_4ref   ).getValue()
       var answersRange4_4range = sheetCoord.getRange(answersRange3_4addr )  
 
