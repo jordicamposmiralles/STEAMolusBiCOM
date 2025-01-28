@@ -108,11 +108,10 @@ function onOpen() {
           // .addItem("Delete meta rows AFTER  a certain one", "menu_DelMetaAFTER")
       )
       .addSubMenu( ui.createMenu("b. Manage USERS (Coord tab)")
-        .addItem("Add users AFTER a certain one", "menu_AddUsersAFTER")
-        //.addSubMenu( ui.createMenu("Add users (rows in user's list)") // check menu_AddUsersBEFORE before activating again this submenu
+        .addSubMenu( ui.createMenu("Add users (rows in user's list)")
         //  .addItem("Add users BEFORE a certain one", "menu_AddUsersBEFORE") // check formating rules cleaning before activating again this menu entry
-        //  .addItem("Add users AFTER  a certain one", "menu_AddUsersAFTER")
-        //)
+          .addItem("Add users AFTER a certain one", "menu_AddUsersAFTER")
+        )
         .addSubMenu( ui.createMenu("Show/Hide certain rows (if desired)")
           .addItem("Show Mixt",    "menu_ShowMixtRowForALLusers")
           .addItem("Hide Mixt",    "menu_HideMixtRowForALLusers")
@@ -244,20 +243,22 @@ function menu_AddMetaBEFORE()  {
   if(result != ui.Button.YES) { ss.toast("Cancelling addition"); return }
  
 
-  // Adding meta rows to Usr sheet (tab)
-  ss.toast("Adding "+numOfNewRows+" meta rows to Usr sheet (tab)...", "Adding");
-  var result = usrSheet_AddMeta(refRow_int, numOfNewRows, "before")
-  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
-
   // Adding content cols to Coord sheet (tab)
-  SpreadsheetApp.flush()
   ss.toast("Adding "+numOfNewRows+" content cols to Coord sheet (tab)...", "Adding");
   ss.getSheetByName(COORD_SHEET_NAME).activate()
-  SpreadsheetApp.flush()
   var result = coordSheet_AddContentColsRelatedToMetaInUsrSheet(refRow_int, numOfNewRows, "before")
   if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
 
+
+  // Adding meta rows to Usr sheet (tab)
+  SpreadsheetApp.flush()
+  ss.toast("Adding "+numOfNewRows+" meta rows to Usr sheet (tab)...", "Adding");
   ss.getSheetByName(USR_SHEET_NAME).activate()
+  SpreadsheetApp.flush()
+  var result = usrSheet_AddMeta(refRow_int, numOfNewRows, "before")
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+
 
 //  // Updating user's spreadsheets (adding meta rows to their spreadsheets' Usr tab)
 //  ss.toast("Updating user's spreadsheets (this will take a while)", "Adding");
