@@ -4,11 +4,10 @@
  * @copyright  Copyright (c) 2022 Jordi Campos Miralles (at STEAMolus)
  * @license    GNU General Public License v3.0
  * @author     Jordi Campos Miralles
- * @author     Gemma Garcia Caceres
  */
 
 // Version
-const BICOM_VERSION                          = "1.2.0-2025.01.23-11:49h"
+const BICOM_VERSION                          = "1.2.0-2025.01.30-10:34h"
 
 // Sheet names
 const README_SHEET_NAME                      = "ReadMe"
@@ -31,7 +30,7 @@ const CFG_USRTAB_HIDE_BOTTOM_1_4             = "J04"
 const CFG_COORDTAB_TPL_USR_ROW_1_4           = "K04"
 const CFG_COORDTAB_BLOCKED_QUESTIONIDS_1_4   = "L04"
 const CFG_COORDTAB_BLOCKED_CHECKBOXES_1_4    = "M04"
-const CFG_USRTAB_ANSWERS_RANGE_1_4           = "N04"
+const CFG_USRTAB_USER_ANSWERS_RANGE_1_4      = "N04"
 const CFG_COORDTAB_NUM_ROWS_PER_USER_1_2     = "O04"
 const CFG_COORDTAB_ROW_HIDDEN_TAGS_1_4       = "P04"
 const CFG_USRTAB_TPL_ROW_1_4                 = "Q04"
@@ -40,6 +39,10 @@ const CFG_USRTAB_EDITABLE_META_1_4           = "S04"
 const CFG_COORDTAB_CONTENT_ID_1_4            = "T04"
 const CFG_COORDTAB_INSERTABLE_CONTENT_ID_1_4 = "U04"
 const CFG_COORDTAB_TPL_CONTENT_COL_1_4       = "V04"
+const CFG_USRTAB_COORD_ANSWERS_RANGE_1_4     = "W04"
+
+const USRTAB_USER_ANSWERS_RANGE_LIST_COL     = "W" // TO-DO: obtain this from CFG_USRTAB_USER_ANSWERS_RANGE_1_4
+const USRTAB_USER_ANSWERS_RANGE_OPEN_COL     = "X"
 
 // Script outputs
 const CFG_CFGTAB_COORD_URL                   = "C05" // (this is also an input)
@@ -112,6 +115,11 @@ function onOpen() {
         //  .addItem("Add users BEFORE a certain one", "menu_AddUsersBEFORE") // check formating rules cleaning before activating again this menu entry
           .addItem("Add users AFTER a certain one", "menu_AddUsersAFTER")
         )
+        .addSubMenu( ui.createMenu("Show only certain rows (if desired)")
+          .addItem("Show only Mixt",    "menu_ShowOnlyMixtRowForALLusers")
+          .addItem("Show only Coord",   "menu_ShowOnlyCoordRowForALLusers")
+          .addItem("Show only User",    "menu_ShowOnlyUserRowForALLusers")
+	)
         .addSubMenu( ui.createMenu("Show/Hide certain rows (if desired)")
           .addItem("Show Mixt",    "menu_ShowMixtRowForALLusers")
           .addItem("Hide Mixt",    "menu_HideMixtRowForALLusers")
@@ -422,6 +430,83 @@ function menu_DelALLusers()  {
   if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
 
   ss.toast("All users deleted.", "Done")
+}
+
+
+
+/**
+* Menu entry to show ONLY the MIXT row for ALL users (hence, it hides all other rows)
+*/
+function menu_ShowOnlyMixtRowForALLusers() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  ss.toast("Showing Mixt rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_MIXT_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding Coord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_COORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding User rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_USER_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding InCoord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_INCOORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Finished: only Mixt rows are shown.", "Show Only")
+}
+
+/**
+* Menu entry to show ONLY the COORD row for ALL users (hence, it hides all other rows)
+*/
+function menu_ShowOnlyCoordRowForALLusers() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  ss.toast("Hiding Mixt rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_MIXT_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Showing Coord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_COORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding User rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_USER_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding InCoord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_INCOORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Finished: only Coord rows are shown.", "Show Only")
+}
+
+/**
+* Menu entry to show ONLY the USER row for ALL users (hence, it hides all other rows)
+*/
+function menu_ShowOnlyUserRowForALLusers() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+
+  ss.toast("Hiding Mixt rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_MIXT_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding Coord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_COORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Showing User rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_SHOW, ROW_USER_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Hiding InCoord rows (it may take some time).", "Show Only")
+  var result = coordSheet_ShowOrHideRows(ROW_HIDE, ROW_INCOORD_POS)
+  if (result != NOERROR) { Browser.msgBox("ERROR("+result+")") ; return }
+
+  ss.toast("Finished: only User rows are shown.", "Show Only")
 }
 
 
@@ -1727,16 +1812,29 @@ function coordSheet_CreateSpreadsheetsForUsers(folderId, filePrefix, iniAbsolute
   templateSheetCfg.getRange(CFG_CFGTAB_COORD_URL).setValue(coordUrl) // into template file
 
   // template file: clean cells to let ImportsRange fill them
+  ss.toast("Cleaning template...", "Create User's files")
   // => clean Config second section (CFG)
   const cleanConfig3_4addr    = sheetCfg.getRange(cleanConfig2_4ref).getValue()
   const cleanConfig4_4range   = templateSheetCfg.getRange(cleanConfig3_4addr  ) // Cfg sheet!
   cleanConfig4_4range.clearContent()
 
-  ss.toast("Cleaning template...", "Create User's files")
   // => clean MetaData  (USR)
   const cleanMeta3_4addr    = sheetCfg.getRange(cleanMeta2_4ref).getValue()
   const cleanMeta4_4range   = templateSheetUsr.getRange(cleanMeta3_4addr  ) // Usr sheet!
   cleanMeta4_4range.clearContent()
+
+  // template file: clean formulae in answer columns (it is there only for UnitTesting purposes)
+  // => clean user's answer columns (USR)
+  const usrAnswersRange2_4ref   = sheetCfg.getRange(CFG_USRTAB_USER_ANSWERS_RANGE_1_4 ).getValue()  
+  const usrAnswersRange3_4addr  = sheetCfg.getRange(usrAnswersRange2_4ref   ).getValue()
+  const usrAnswersRange4_4range = templateSheetUsr.getRange(usrAnswersRange3_4addr ) // Usr sheet!
+  usrAnswersRange4_4range.clearContent()
+
+  // => clean coord's answer columns (USR)
+  const coordAnswersRange2_4ref   = sheetCfg.getRange(CFG_USRTAB_COORD_ANSWERS_RANGE_1_4).getValue()  
+  const coordAnswersRange3_4addr  = sheetCfg.getRange(coordAnswersRange2_4ref   ).getValue()
+  const coordAnswersRange4_4range = templateSheetUsr.getRange(coordAnswersRange3_4addr ) // Usr sheet!
+  coordAnswersRange4_4range.clearContent()
 
   // template file: hide technical stuff
   const hideMeta3_4addr       = sheetCfg.getRange(hideMeta2_4ref   ).getValue()
@@ -2250,8 +2348,9 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
   // If some parameters are missing, let's get them from Config
   if ( firstQuestionId_int==0 || ! firstAnswerRow_int==0 ) {
     var ss = SpreadsheetApp.getActiveSpreadsheet()
-    var sheetCfg                   = ss.getSheetByName(CFG_SHEET_NAME)
-    var sheetCoord                 = ss.getSheetByName(COORD_SHEET_NAME)
+    var sheetCfg    = ss.getSheetByName(CFG_SHEET_NAME)
+    var sheetCoord  = ss.getSheetByName(COORD_SHEET_NAME)
+    var sheetUsr    = ss.getSheetByName(USR_SHEET_NAME)
 
     // Load first checkbox col number from config
     if ( firstQuestionId_int==0 ) {
@@ -2264,9 +2363,9 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
 
     // Load first answer row number from config
     if ( firstAnswerRow_int==0 ) {
-      var answersRange2_4ref   = sheetCfg.getRange(CFG_USRTAB_ANSWERS_RANGE_1_4 ).getValue()  
+      var answersRange2_4ref   = sheetCfg.getRange(CFG_USRTAB_USER_ANSWERS_RANGE_1_4 ).getValue()  
       var answersRange3_4addr  = sheetCfg.getRange(answersRange2_4ref   ).getValue()
-      var answersRange4_4range = sheetCoord.getRange(answersRange3_4addr )  
+      var answersRange4_4range = sheetUsr.getRange(answersRange3_4addr )  
 
       firstAnswerRow_int = answersRange4_4range.getRow()
     }  
@@ -2274,7 +2373,7 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
 
   // Compute answer in A1 notation
   var answerRow   = (questionId - firstQuestionId_int)  + firstAnswerRow_int
-  var answerA1Not = 'V'+answerRow+':W'+answerRow
+  var answerA1Not = USRTAB_USER_ANSWERS_RANGE_LIST_COL+answerRow+':'+USRTAB_USER_ANSWERS_RANGE_OPEN_COL+answerRow
 
   return answerA1Not
 }
@@ -2332,6 +2431,134 @@ function getAnswerRowFromQuestionId(questionId, firstQuestionId_int=0, firstAnsw
 function getIdFromUrl(url) {
   return url.match(/[-\w]{25,}/)[0];
 }
+
+
+
+
+
+/**
+ * Clear conditional formatting applied to a range
+ *
+ * Suggested code for prompt: "How can I clear conditional formating in a certain range of a Google Spreadsheet sheet using App Script by updating the rules to avoid containing that specific range?"
+ *
+ * @param range to be clear
+ */
+// function clearConditionalFormattingInRange() {
+//   // Define the target sheet and range
+//   const ss = SpreadsheetApp.getActiveSpreadsheet();
+//   const sheet = ss.getSheetByName("YourSheetName"); // Replace "YourSheetName"
+//   const targetRange = sheet.getRange("A1:B10"); // Replace with your desired range
+// 
+//   // Get the existing conditional format rules
+//   const rules = sheet.getConditionalFormatRules();
+// 
+//   // Create a new array to store the updated rules
+//   const updatedRules = [];
+// 
+//   // Iterate through the existing rules
+//   for (const rule of rules) {
+//     const ranges = rule.getRanges();
+//     const newRanges = [];
+//     let ruleNeedsUpdate = false;
+// 
+//     for (const range of ranges) {
+//       // Check if the current range intersects with the target range
+//       if (intersects(range, targetRange)) {
+//         ruleNeedsUpdate = true;
+//         // If the current range is the same as the target range, we don't add it to the new ranges
+//         if (!isSameRange(range, targetRange)) {
+//           // If the current range is bigger than the target range, we need to substract the target range from it
+//           const substractedRanges = substractRange(range, targetRange);
+//           for (const substractedRange of substractedRanges) {
+//             newRanges.push(substractedRange);
+//           }
+//         }
+//       } else {
+//         // If the current range does not intersect with the target range, we keep it
+//         newRanges.push(range);
+//       }
+//     }
+// 
+//     // If the rule needs to be updated, we create a new rule with the new ranges
+//     if (ruleNeedsUpdate) {
+//       if (newRanges.length > 0) {
+//         const newRule = rule.copy().setRanges(newRanges).build();
+//         updatedRules.push(newRule);
+//       }
+//     } else {
+//       // If the rule does not need to be updated, we keep it
+//       updatedRules.push(rule);
+//     }
+//   }
+// 
+//   // Set the updated rules to the sheet
+//   sheet.setConditionalFormatRules(updatedRules);
+// }
+// 
+// // Helper functions to check if two ranges intersect and if they are the same
+// function intersects(range1, range2) {
+//   const r1StartRow = range1.getRow();
+//   const r1StartCol = range1.getColumn();
+//   const r1EndRow = r1StartRow + range1.getNumRows() - 1;
+//   const r1EndCol = r1StartCol + range1.getNumColumns() - 1;
+// 
+//   const r2StartRow = range2.getRow();
+//   const r2StartCol = range2.getColumn();
+//   const r2EndRow = r2StartRow + range2.getNumRows() - 1;
+//   const r2EndCol = r2StartCol + range2.getNumColumns() - 1;
+// 
+//   return (
+//     r1StartRow <= r2EndRow &&
+//     r1EndRow >= r2StartRow &&
+//     r1StartCol <= r2EndCol &&
+//     r1EndCol >= r2StartCol
+//   );
+// }
+// 
+// function isSameRange(range1, range2) {
+//   return (
+//     range1.getA1Notation() === range2.getA1Notation()
+//   );
+// }
+// 
+// function substractRange(range1, range2) {
+//   const r1StartRow = range1.getRow();
+//   const r1StartCol = range1.getColumn();
+//   const r1EndRow = r1StartRow + range1.getNumRows() - 1;
+//   const r1EndCol = r1StartCol + range1.getNumColumns() - 1;
+// 
+//   const r2StartRow = range2.getRow();
+//   const r2StartCol = range2.getColumn();
+//   const r2EndRow = r2StartRow + range2.getNumRows() - 1;
+//   const r2EndCol = r2StartCol + range2.getNumColumns() - 1;
+// 
+//   const newRanges = [];
+// 
+//   // Check if the target range is inside the current range
+//   if (r2StartRow >= r1StartRow && r2EndRow <= r1EndRow && r2StartCol >= r1StartCol && r2EndCol <= r1EndCol) {
+//     // Check if there is a range above the target range
+//     if (r2StartRow > r1StartRow) {
+//       newRanges.push(range1.getSheet().getRange(r1StartRow, r1StartCol, r2StartRow - r1StartRow, range1.getNumColumns()));
+//     }
+//     // Check if there is a range below the target range
+//     if (r2EndRow < r1EndRow) {
+//       newRanges.push(range1.getSheet().getRange(r2EndRow + 1, r1StartCol, r1EndRow - r2EndRow, range1.getNumColumns()));
+//     }
+//     // Check if there is a range to the left of the target range
+//     if (r2StartCol > r1StartCol) {
+//       newRanges.push(range1.getSheet().getRange(r2StartRow, r1StartCol, range2.getNumRows(), r2StartCol - r1StartCol));
+//     }
+//     // Check if there is a range to the right of the target range
+//     if (r2EndCol < r1EndCol) {
+//       newRanges.push(range1.getSheet().getRange(r2StartRow, r2EndCol + 1, range2.getNumRows(), r1EndCol - r2EndCol));
+//     }
+//   } else {
+//     newRanges.push(range1);
+//   }
+// 
+//   return newRanges;
+// }
+
 
 
 /**
